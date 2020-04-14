@@ -1,12 +1,16 @@
 /*
 * 入口JS
 * */
-import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
+import Vue from 'vue';
+import App from './App.vue';
+import router from './router';
+import store from './store';
+
+Vue.config.productionTip = false;
 
 new Vue({
   el : '#app',
   render:h => h(App),
-  router
+  router, //使用vue-router
+  store, //使用vuex
 })

@@ -1,7 +1,7 @@
 <template>
   <section class="msite">
     <!--首页头部-->
-    <HeaderTop title="湖北省鄂州市临空经济区">
+    <HeaderTop :title=address.name>
       <span class="header_search" slot="left">
         <i class="iconfont icon-sousuo"></i>
       </span>
@@ -11,113 +11,23 @@
     </HeaderTop>
     <!--首页导航-->
     <nav class="msite_nav">
-      <div class="swiper-container">
-        <div class="swiper-wrapper">
-          <div class="swiper-slide">
-            <a href="javascript:" class="link_to_food">
+      <div class="swiper-container" v-if="categorys.length">
+        <div class="swiper-wrapper" >
+          <div class="swiper-slide" v-for="(categorys,index) in categorysArr" :key=index>
+            <a href="javascript:" class="link_to_food" v-for="(category,index) in categorys" :key=index>
               <div class="food_container">
-                <img src="./images/nav/1.jpg">
+                <img :src="baseImageUrl + category.image_url">
               </div>
-              <span>甜品饮品</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/2.jpg">
-              </div>
-              <span>商超便利</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/3.jpg">
-              </div>
-              <span>美食</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/4.jpg">
-              </div>
-              <span>简餐</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/5.jpg">
-              </div>
-              <span>新店特惠</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/6.jpg">
-              </div>
-              <span>准时达</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/7.jpg">
-              </div>
-              <span>预订早餐</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/8.jpg">
-              </div>
-              <span>土豪推荐</span>
-            </a>
-          </div>
-          <div class="swiper-slide">
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/9.jpg">
-              </div>
-              <span>甜品饮品</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/10.jpg">
-              </div>
-              <span>商超便利</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/11.jpg">
-              </div>
-              <span>美食</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/12.jpg">
-              </div>
-              <span>简餐</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/13.jpg">
-              </div>
-              <span>新店特惠</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/14.jpg">
-              </div>
-              <span>准时达</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/1.jpg">
-              </div>
-              <span>预订早餐</span>
-            </a>
-            <a href="javascript:" class="link_to_food">
-              <div class="food_container">
-                <img src="./images/nav/2.jpg">
-              </div>
-              <span>土豪推荐</span>
+              <span>{{category.title}}</span>   <!--{{category.title}}-->
             </a>
           </div>
         </div>
         <!-- Add Pagination -->
         <div class="swiper-pagination"></div>
       </div>
+      <img src="./images/msite_back.svg" alt="" v-else>
     </nav>
+
     <!--首页附近商家-->
     <div class="msite_shop_list">
       <div class="shop_header">
@@ -135,25 +45,58 @@
 
   import Swiper from 'swiper'
   import 'swiper/css/swiper.min.css'
+  import {mapActions,mapState} from 'vuex'
 
   export default {
+    data () {
+      return {
+        baseImageUrl: 'https://fuss10.elemecdn.com'
+      }
+    },
     mounted() {
-      //创建一个Swiper实例对象，来实现轮播
-      new Swiper('.swiper-container',{
-        loop: true, // 循环模式选项
+      this.$store.dispatch('getCategorys')  //获取商品分类
 
-        // 如果需要分页器
-        pagination: {
-          el: '.swiper-pagination',
-        },
-      })
 
+    },
+    computed:{
+        ...mapState(['address','categorys']),
+
+      categorysArr(){
+        let arr = this.$store.state.categorys
+        let arrCut = []
+        let arrNew = []
+        //如果数组长度大于8,就一直把它的前8个切除为二维数组的子数组
+        while (arr.length > 8 ){
+          arrCut = arr.splice(0,8);
+          arrNew.push(arrCut);
+          arrCut = []
+        }
+        //剩余的小于等于8的作为二维数组的最后一个子数组
+        arrNew.push(arr);
+        return arrNew
+      }
+    },
+    watch:{ //监视商品分类categorys数组，获取到商品分类后就立即创建swiper实例对象
+      categorysArr(){
+        this.$nextTick(() => {  //数据一旦更新，执行回调函数，更新页面。
+          //创建一个Swiper实例对象，来实现轮播
+          new Swiper('.swiper-container',{
+            loop: true, // 循环模式选项
+            // 如果需要分页器
+            pagination: {
+              el: '.swiper-pagination',
+            },
+          })
+        })
+      }
     },
     components: {
       HeaderTop,
       ShopList
     }
   }
+
+
 </script>
 <style lang="stylus" rel="stylesheet/stylus">
   @import "../../common/stylus/mixins.styl"

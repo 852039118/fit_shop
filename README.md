@@ -1,4 +1,4 @@
-# vue_warren
+# fit_shop
 
 > A Vue.js project
 
